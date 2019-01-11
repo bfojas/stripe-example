@@ -1,25 +1,39 @@
 import React, { Component } from 'react';
 import logo from './logo.svg';
 import './App.css';
+import StripeCheckout from 'react-stripe-checkout'
+import axios from 'axios';
 
 class App extends Component {
+  constructor(){
+    super();
+    this.state = {amount:100}
+    this.onToken = this.onToken.bind(this)
+  }
+  onToken(token){
+    console.log(token)
+    const {amount} = this.state
+    axios.post('/stripe', {token, amount})
+    .then(res=>alert('payment successful')
+    )
+  }
+
   render() {
+  const {amount} = this.state
     return (
       <div className="App">
-        <header className="App-header">
-          <img src={logo} className="App-logo" alt="logo" />
-          <p>
-            Edit <code>src/App.js</code> and save to reload.
-          </p>
-          <a
-            className="App-link"
-            href="https://reactjs.org"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Learn React
-          </a>
-        </header>
+        <input type="text" value={amount} 
+                        onChange={e=>this.setState({amount:e.target.value})} />
+        <StripeCheckout
+                    ComponentClass = "stripe"
+                    email = "test@test.com"
+                    amount={amount}
+                    description=""
+                    token = {this.onToken}
+                    allowRememberMe={false}
+                    //Publishable key
+                    stripeKey = {process.env.REACT_APP_STRIPE_KEY}
+                />
       </div>
     );
   }
